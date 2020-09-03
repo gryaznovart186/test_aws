@@ -1,4 +1,4 @@
-## Инструкция по за пуску
+## Инструкция по запуску
 1. Сгенерировать SSH ключь если его нет (`ssh-keygen`) Ключь необходим для подключения по ssh к ВМ
 2. Переименовать terraform.tfvars.example в terraform.tfvars и заполнить ключи для доступа к AWS(Если ключей нет можно создать и скачать ключи здесь https://console.aws.amazon.com/iam/home?region=us-east-2#/security_credentials)
 3. Выполнить команду terraform init 
