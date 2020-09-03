@@ -1,0 +1,4 @@
+all:
+  hosts:
+    nginx:
+      ansible_host: 18.218.229.174

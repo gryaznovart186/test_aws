@@ -1,0 +1,4 @@
+- name: restart nginx
+  docker_container:
+    name: nginx
+    restart: "yes"

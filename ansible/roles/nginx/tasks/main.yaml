@@ -1,0 +1,48 @@
+---
+- name: Create a directory with for stream jpeg and nginx confs 
+  file:
+    path: "/opt/nginx/{{  item }}"
+    state: directory
+    mode: '0777'
+  loop:
+    - ""
+    - config
+    - stream
+
+- name: Copy nginx config
+  copy:
+    src: default.conf
+    dest: /opt/nginx/config
+    mode: '655'
+  notify: restart nginx
+
+- name: Copy html page
+  copy:
+    src: index.html
+    dest: /opt/nginx/stream
+    mode: '655'
+  notify: restart nginx
+
+
+# ffmpeg -y -i rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov -update 1 -qscale:v 1 /tmp/bunny.jpg
+- name: run docker with ffmpeg
+  docker_container:
+    name: ffmpeg
+    image: jrottenberg/ffmpeg:3.2.15-alpine38
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - /opt/nginx/stream:/opt/nginx/stream
+    command: -y -i rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov -update 1 -qscale:v 1 /opt/nginx/stream/bunny.jpg
+
+- name: run docker with nginx
+  docker_container:
+    name: nginx
+    image: nginx:1.19.2-alpine
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - /opt/nginx/stream:/opt/nginx/stream
+      - /opt/nginx/config:/etc/nginx/conf.d
+    ports:
+      - 80:80

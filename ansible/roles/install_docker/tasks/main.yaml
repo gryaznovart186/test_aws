@@ -1,0 +1,56 @@
+---
+- name: Install pip package manager
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - python-pip
+
+- name: Delete unnecessary docker utilities
+  yum:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - docker 
+    - docker-client 
+    - docker-client-latest 
+    - docker-common 
+    - docker-latest 
+    - docker-latest-logrotate 
+    - docker-logrotate 
+    - docker-engine
+
+- name: Add docker yum repo
+  yum_repository:
+    name: docker-ce-stable
+    description: Docker CE Stable - $basearch
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgkey: https://download.docker.com/linux/centos/gpg
+    gpgcheck: yes
+    enabled: yes
+
+- name: Install latest version docker-engine
+  yum:
+    name: docker-ce 
+    state: latest
+
+- name: Start docker daemon
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: copy docker config
+  copy:
+    src: daemon.json
+    dest: /etc/docker/
+  notify: restart docker
+
+- name: Upgrade pip and install docker-py for run docker containers with ansible
+  pip:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - pip 
+    - docker-py
